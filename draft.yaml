@@ -1,0 +1,21 @@
+models:
+  Exercise:
+    title: string
+    number: integer
+    height: integer nullable
+    uses_cable: boolean
+    url: string nullable
+    relationships:
+      hasMany: DiaryEntry
+      belongsToMany: Muscle
+
+  Muscle:
+    name: string
+    relationships:
+      belongsToMany: Exercise
+
+  DiaryEntry:
+    date: date
+    weight: integer
+    relationships:
+      belongsTo: Exercise

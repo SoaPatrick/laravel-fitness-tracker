@@ -1,0 +1,15 @@
+created:
+    - database/factories/ExerciseFactory.php
+    - database/factories/MuscleFactory.php
+    - database/factories/DiaryEntryFactory.php
+    - database/migrations/2024_06_02_184259_create_exercises_table.php
+    - database/migrations/2024_06_02_184300_create_muscles_table.php
+    - database/migrations/2024_06_02_184301_create_diary_entries_table.php
+    - database/migrations/2024_06_02_184302_create_exercise_muscle_table.php
+    - app/Models/Exercise.php
+    - app/Models/Muscle.php
+    - app/Models/DiaryEntry.php
+models:
+    Exercise: { title: string, number: integer, height: 'integer nullable', uses_cable: boolean, url: 'string nullable', relationships: { hasMany: DiaryEntry, belongsToMany: Muscle } }
+    Muscle: { name: string, relationships: { belongsToMany: Exercise } }
+    DiaryEntry: { date: date, weight: integer, relationships: { belongsTo: Exercise } }
