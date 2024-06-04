@@ -25,12 +25,14 @@ class DiaryEntryResource extends Resource
         return $form
             ->schema([
                 Forms\Components\DatePicker::make('date')
-                    ->required(),
+                    ->required()
+                    ->default(now()->toDateString()),
                 Forms\Components\Select::make('exercise_id')
                     ->relationship('exercise', 'title')
                     ->required(),
                 Forms\Components\ToggleButtons::make('weight')
                     ->grouped()
+                    ->required()
                     ->options([
                         '1' => '1',
                         '2' => '2',
