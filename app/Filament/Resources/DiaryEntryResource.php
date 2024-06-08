@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\DiaryEntryResource\Pages;
 use App\Filament\Resources\DiaryEntryResource\RelationManagers;
 use App\Models\DiaryEntry;
+use App\Models\Exercise;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,6 +14,9 @@ use Filament\Tables\Table;
 use Filament\Tables\Grouping\Group;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Database\Eloquent\Model;
+use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Actions\Action;
 
 class DiaryEntryResource extends Resource
 {
@@ -28,7 +32,10 @@ class DiaryEntryResource extends Resource
                     ->required()
                     ->default(now()->toDateString()),
                 Forms\Components\Select::make('exercise_id')
-                    ->relationship('exercise', 'title')
+                    ->relationship('exercise', 'title', modifyQueryUsing: fn (Builder $query) => $query->orderBy('number'),)
+                    ->searchable()
+                    ->preload()
+                    ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->number}. {$record->title}")
                     ->required(),
                 Forms\Components\ToggleButtons::make('weight')
                     ->grouped()
@@ -66,11 +73,17 @@ class DiaryEntryResource extends Resource
                 Tables\Columns\TextColumn::make('exercise.title')
                     ->numeric()
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight(FontWeight::Bold)
+                    ->prefix(fn (DiaryEntry $record) => $record->exercise->number . '. ')
+                    ->url(fn (DiaryEntry $record): string => ExerciseResource::getUrl('edit', ['record' => $record])),
                 Tables\Columns\TextColumn::make('exercise.muscles.name')
                     ->badge()
                     ->numeric()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('exercise.height')
+                    ->numeric()
+                    ->suffix('cm'),
                 Tables\Columns\TextColumn::make('weight')
                     ->numeric()
                     ->sortable(),
@@ -89,6 +102,7 @@ class DiaryEntryResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
