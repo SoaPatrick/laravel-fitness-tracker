@@ -87,8 +87,7 @@ class DiaryEntryResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->weight(FontWeight::Bold)
-                    ->prefix(fn (DiaryEntry $record) => $record->exercise->number . '. ')
-                    ->url(fn($record) => url("/exercises/{$record->exercise->id}/edit")),
+                    ->prefix(fn (DiaryEntry $record) => $record->exercise->number . '. '),
                 Tables\Columns\TextColumn::make('exercise.muscles.name')
                     ->badge()
                     ->numeric()
@@ -115,7 +114,10 @@ class DiaryEntryResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                //Tables\Actions\EditAction::make(),
+                Action::make('exercise')
+                    ->icon('heroicon-o-fire')
+                    ->url(fn($record) => url("/exercises/{$record->exercise->id}/edit")),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
