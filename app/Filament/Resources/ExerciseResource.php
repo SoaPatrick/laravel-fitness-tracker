@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ExerciseResource\Pages;
 use App\Filament\Resources\ExerciseResource\RelationManagers;
 use App\Models\Exercise;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,12 +14,13 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
+use Filament\Support\Enums\FontWeight;
 
 class ExerciseResource extends Resource
 {
     protected static ?string $model = Exercise::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-fire';
 
     public static function form(Form $form): Form
     {
@@ -31,24 +33,40 @@ class ExerciseResource extends Resource
                         ->label('ID')
                         ->required()
                         ->numeric()
-                        ->columnSpan(1),
+                        ->columnSpan([
+                                'md' => 1,
+                            ]),
                     Forms\Components\TextInput::make('title')
                         ->required()
-                        ->columnSpan(5),
+                        ->columnSpan([
+                                'md' => 5,
+                            ]),
                     Forms\Components\TextInput::make('height')
                         ->numeric(),
                     Forms\Components\TextInput::make('url')
                         ->rules('url:https')
-                        ->prefixIcon('heroicon-m-globe-alt')
-                        ->columnSpan(3),
+                        ->columnSpan([
+                                'md' => 3,
+                            ])
+                        ->prefixAction(
+                            Action::make('openUrl')
+                                ->icon('heroicon-m-globe-alt')
+                                ->url(fn (Exercise $exercise) => $exercise->url)
+                                ->openUrlInNewTab()
+                                ->hidden(fn (Exercise $exercise) => !$exercise->url),
+                        ),
                     Forms\Components\ToggleButtons::make('uses_cable')
                         ->required()
                         ->grouped()
                         ->boolean()
                         ->default(false)
-                        ->columnSpan(2),
+                        ->columnSpan([
+                                'md' => 2,
+                            ]),
                 ])
-                ->columns('6'),
+                ->columns([
+                                'md' => 6,
+                            ]),
                 Forms\Components\Section::make('Muscle Information')
                 ->description('Chose which muscle groups this exercise targets.')
                 ->schema([
@@ -71,15 +89,14 @@ class ExerciseResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('title')
                     ->searchable()
-                    ->sortable()
-                    ->description(function(Exercise $record) {
-                        return Str::of($record->url)->limit(40);
-                    }),
+                    ->weight(FontWeight::Bold)
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('muscles.name')
                     ->searchable()
                     ->badge(),
                 Tables\Columns\TextColumn::make('height')
                     ->numeric()
+                    ->sortable()
                     ->suffix('cm'),
                 Tables\Columns\IconColumn::make('uses_cable')
                     ->sortable()
@@ -99,7 +116,6 @@ class ExerciseResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -111,7 +127,7 @@ class ExerciseResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\DiaryentriesRelationManager::class,
         ];
     }
 

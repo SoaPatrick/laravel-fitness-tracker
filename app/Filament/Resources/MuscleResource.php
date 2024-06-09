@@ -17,7 +17,7 @@ class MuscleResource extends Resource
 {
     protected static ?string $model = Muscle::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-scale';
 
     public static function form(Form $form): Form
     {

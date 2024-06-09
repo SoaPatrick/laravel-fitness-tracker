@@ -41,6 +41,6 @@ class Exercise extends Model
 
     public function muscles(): BelongsToMany
     {
-        return $this->belongsToMany(Muscle::class);
+        return $this->belongsToMany(Muscle::class, 'exercise_muscle', 'exercise_id', 'muscle_id');
     }
 }

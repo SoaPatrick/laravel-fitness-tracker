@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\DiaryEntryResource\Pages;
 use App\Filament\Resources\DiaryEntryResource\RelationManagers;
+use App\Filament\Resources\ExerciseResource\RelationManagers\DiaryentriesRelationManager;
 use App\Models\DiaryEntry;
 use App\Models\Exercise;
 use Filament\Forms;
@@ -22,40 +23,51 @@ class DiaryEntryResource extends Resource
 {
     protected static ?string $model = DiaryEntry::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\DatePicker::make('date')
-                    ->required()
-                    ->default(now()->toDateString()),
-                Forms\Components\Select::make('exercise_id')
-                    ->relationship('exercise', 'title', modifyQueryUsing: fn (Builder $query) => $query->orderBy('number'),)
-                    ->searchable()
-                    ->preload()
-                    ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->number}. {$record->title}")
-                    ->required(),
-                Forms\Components\ToggleButtons::make('weight')
-                    ->grouped()
-                    ->required()
-                    ->options([
-                        '1' => '1',
-                        '2' => '2',
-                        '3' => '3',
-                        '4' => '4',
-                        '5' => '5',
-                        '6' => '6',
-                        '7' => '7',
-                        '8' => '8',
-                        '9' => '9',
-                        '10' => '10',
-                        '11' => '11',
-                        '12' => '12',
-                        'max' => 'Max',
-                    ]),
-            ]);
+                Forms\Components\Section::make('Diary Entry Information')
+                    ->columns([
+                        'md' => 2,
+                    ])
+                    ->description('Enter the information for the diary entry.')
+                    ->schema([
+                        Forms\Components\DatePicker::make('date')
+                            ->required()
+                            ->default(now()->toDateString()),
+                        Forms\Components\Select::make('exercise_id')
+                            ->hiddenOn(DiaryentriesRelationManager::class)
+                            ->relationship('exercise', 'title', modifyQueryUsing: fn (Builder $query) => $query->orderBy('number'),)
+                            ->searchable()
+                            ->preload()
+                            ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->number}. {$record->title}")
+                            ->required(),
+                        Forms\Components\ToggleButtons::make('weight')
+                            ->inline()
+                            ->required()
+                            ->options([
+                                '1' => '1',
+                                '2' => '2',
+                                '3' => '3',
+                                '4' => '4',
+                                '5' => '5',
+                                '6' => '6',
+                                '7' => '7',
+                                '8' => '8',
+                                '9' => '9',
+                                '10' => '10',
+                                '11' => '11',
+                                '12' => '12',
+                                'max' => 'Max',
+                            ])
+                            ->columnSpan([
+                                'md' => 2,
+                            ]),
+                        ])
+                    ]);
     }
 
     public static function table(Table $table): Table
@@ -76,7 +88,7 @@ class DiaryEntryResource extends Resource
                     ->sortable()
                     ->weight(FontWeight::Bold)
                     ->prefix(fn (DiaryEntry $record) => $record->exercise->number . '. ')
-                    ->url(fn (DiaryEntry $record): string => ExerciseResource::getUrl('edit', ['record' => $record])),
+                    ->url(fn($record) => url("/exercises/{$record->exercise->id}/edit")),
                 Tables\Columns\TextColumn::make('exercise.muscles.name')
                     ->badge()
                     ->numeric()
@@ -86,6 +98,8 @@ class DiaryEntryResource extends Resource
                     ->suffix('cm'),
                 Tables\Columns\TextColumn::make('weight')
                     ->numeric()
+                    ->badge()
+                    ->color('gray')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -102,7 +116,6 @@ class DiaryEntryResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
