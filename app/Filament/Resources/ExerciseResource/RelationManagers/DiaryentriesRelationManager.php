@@ -28,7 +28,7 @@ class DiaryentriesRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('date')
                     ->sortable()
-                    ->date(),
+                    ->date('l j M Y'),
                 Tables\Columns\TextColumn::make('weight')
                     ->sortable()
                     ->badge()
@@ -43,7 +43,7 @@ class DiaryentriesRelationManager extends RelationManager
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                //Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

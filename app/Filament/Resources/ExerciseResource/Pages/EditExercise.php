@@ -16,4 +16,16 @@ class EditExercise extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function getFooterWidgets(): array
+    {
+        return [
+            ExerciseResource\Widgets\ExerciseChart::class,
+        ];
+    }
+
+    public function getFooterWidgetsColumns(): int | array
+    {
+        return 1;
+    }
 }

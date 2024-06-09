@@ -80,7 +80,7 @@ class DiaryEntryResource extends Resource
             ])
             ->columns([
                 Tables\Columns\TextColumn::make('date')
-                    ->date()
+                    ->date('l j M Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('exercise.title')
                     ->numeric()
