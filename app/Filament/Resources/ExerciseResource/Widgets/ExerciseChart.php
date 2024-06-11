@@ -21,14 +21,13 @@ class ExerciseChart extends ChartWidget
         $exerciseId = $this->record->id;
 
         $diaryEntries = DiaryEntry::where('exercise_id', $exerciseId)
-                                          ->latest()
-                                          ->take(10)
                                           ->get()
-                                          ->sortBy('created_at')
-                                          ->values(); //
+                                          ->sortBy('date')
+                                          ->slice(-10)
+                                          ->values();
 
         $labels = $diaryEntries->map(function ($entry) {
-            return Carbon::parse($entry->created_at)->format('l j M Y');
+            return Carbon::parse($entry->date)->format('j M');
         });
 
         $weights = $diaryEntries->map(function ($entry) {
