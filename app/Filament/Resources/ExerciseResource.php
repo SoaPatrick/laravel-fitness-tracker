@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Orientation;
 use App\Filament\Resources\ExerciseResource\Pages;
 use App\Filament\Resources\ExerciseResource\RelationManagers;
 use App\Models\Exercise;
@@ -26,56 +27,80 @@ class ExerciseResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Exercise Information')
-                ->description('Enter the information for the exercise.')
-                ->schema([
-                    Forms\Components\TextInput::make('number')
-                        ->label('ID')
-                        ->required()
-                        ->numeric()
-                        ->columnSpan([
-                                'md' => 1,
-                            ]),
-                    Forms\Components\TextInput::make('title')
-                        ->required()
-                        ->columnSpan([
-                                'md' => 5,
-                            ]),
-                    Forms\Components\TextInput::make('height')
-                        ->numeric(),
-                    Forms\Components\TextInput::make('url')
-                        ->rules('url:https')
-                        ->columnSpan([
-                                'md' => 3,
-                            ])
-                        ->prefixAction(
-                            Action::make('openUrl')
-                                ->icon('heroicon-m-globe-alt')
-                                ->url(fn (Exercise $exercise) => $exercise->url)
-                                ->openUrlInNewTab()
-                                ->hidden(fn (Exercise $exercise) => !$exercise->url),
-                        ),
-                    Forms\Components\ToggleButtons::make('uses_cable')
-                        ->required()
-                        ->grouped()
-                        ->boolean()
-                        ->default(false)
-                        ->columnSpan([
-                                'md' => 2,
-                            ]),
+                Forms\Components\Split::make([
+                    Forms\Components\Section::make('Exercise Details')
+                        ->description('Enter the information for the exercise.')
+                        ->schema([
+                            Forms\Components\TextInput::make('number')
+                                ->label('ID')
+                                ->required()
+                                ->columnSpanFull()
+                                ->numeric(),
+                            Forms\Components\TextInput::make('title')
+                                ->columnSpanFull()
+                                ->required(),
+                            Forms\Components\TextInput::make('height')
+                                ->columnSpanFull()
+                                ->numeric(),
+                            Forms\Components\ToggleButtons::make('uses_cable')
+                                ->required()
+                                ->grouped()
+                                ->boolean()
+                                ->default(false),
+                            Forms\Components\ToggleButtons::make('orientation')
+                                ->required()
+                                ->grouped()
+                                ->options(Orientation::class)
+                                ->default('up'),
+                            Forms\Components\Select::make('muscles')
+                                ->multiple()
+                                ->columnSpanFull()
+                                ->relationship('muscles', 'name')
+                                ->preload()
+                                ->required(),
+                        ])
+                    ->grow(true),
+                    Forms\Components\Section::make()
+                        ->schema([
+                            Forms\Components\FileUpload::make('preview_image')
+                                ->directory('exercises-preview-images')
+                                ->image()
+                                ->openable()
+                                ->panelAspectRatio('1')
+                                ->panelLayout('integrated')
+                                ->removeUploadedFileButtonPosition('right')
+                                ->previewable(true)
+                                ->columnSpan(2),
+                            Forms\Components\TextInput::make('url')
+                                ->columnSpanFull()
+                                ->rules('url:https')
+                                ->columnSpanFull()
+                                ->prefixAction(
+                                    Action::make('openUrl')
+                                        ->icon('heroicon-m-globe-alt')
+                                        ->url(fn (Exercise $exercise) => $exercise->url)
+                                        ->openUrlInNewTab()
+                                        ->hidden(fn (Exercise $exercise) => !$exercise->url),
+                                ),
+                            Forms\Components\TextInput::make('video_url')
+                                ->columnSpanFull()
+                                ->rules('url:https')
+                                ->columnSpanFull()
+                                ->prefixAction(
+                                    Action::make('openUrl')
+                                        ->icon('heroicon-m-video-camera')
+                                        ->url(fn (Exercise $exercise) => $exercise->video_url)
+                                        ->openUrlInNewTab()
+                                        ->hidden(fn (Exercise $exercise) => !$exercise->video_url),
+                                ),
+                        ])
+                        ->columns([
+                            'md' => 2,
+                        ])
+                    ->grow(true),
                 ])
-                ->columns([
-                                'md' => 6,
-                            ]),
-                Forms\Components\Section::make('Muscle Information')
-                ->description('Chose which muscle groups this exercise targets.')
-                ->schema([
-                    Forms\Components\Select::make('muscles')
-                        ->multiple()
-                        ->relationship('muscles', 'name')
-                        ->preload()
-                        ->required(),
-                ]),
+                ->from('xl')
+                ->columnSpanFull(),
             ]);
     }
 
@@ -83,6 +108,7 @@ class ExerciseResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('preview_image'),
                 Tables\Columns\TextColumn::make('number')
                     ->label('ID')
                     ->numeric()
@@ -98,6 +124,8 @@ class ExerciseResource extends Resource
                     ->numeric()
                     ->sortable()
                     ->suffix('cm'),
+                Tables\Columns\IconColumn::make('orientation')
+                    ->sortable(),
                 Tables\Columns\IconColumn::make('uses_cable')
                     ->sortable()
                     ->boolean(),
@@ -111,6 +139,7 @@ class ExerciseResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('number', 'asc')
+            ->defaultPaginationPageOption(25)
             ->filters([
                 //
             ])
