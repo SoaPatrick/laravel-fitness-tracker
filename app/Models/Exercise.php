@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Orientation;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -22,6 +23,9 @@ class Exercise extends Model
         'height',
         'uses_cable',
         'url',
+        'orientation',
+        'video_url',
+        'preview_image',
     ];
 
     /**
@@ -32,6 +36,7 @@ class Exercise extends Model
     protected $casts = [
         'id' => 'integer',
         'uses_cable' => 'boolean',
+        'orientation' => Orientation::class,
     ];
 
     public function diaryEntries(): HasMany
