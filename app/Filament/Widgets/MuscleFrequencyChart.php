@@ -4,27 +4,34 @@ namespace App\Filament\Widgets;
 
 use Filament\Widgets\ChartWidget;
 use App\Models\DiaryEntry;
+use App\Enums\Muscle;
 
 class MuscleFrequencyChart extends ChartWidget
 {
     protected static ?string $heading = 'Muscle Frequency';
 
-
     protected function getData(): array
     {
-        // Angenommen, es gibt eine Methode in Ihrem Exercise-Modell, die die Muskeln zurückgibt
-        // und jedes DiaryEntry hat ein zugehöriges Exercise
-        $diaryEntries = DiaryEntry::with('exercise.muscles')->get();
+        // Holen Sie alle Diary Entries mit zugehörigen Übungen
+        $diaryEntries = DiaryEntry::with('exercise')->get();
 
         $muscleFrequency = [];
 
         foreach ($diaryEntries as $entry) {
-            foreach ($entry->exercise->muscles as $muscle) {
-                $muscleName = $muscle->name; // Angenommen, es gibt ein 'name' Feld in der Muskel-Entität
-                if (!isset($muscleFrequency[$muscleName])) {
-                    $muscleFrequency[$muscleName] = 0;
+            // Sicherstellen, dass primary_muscles und secondary_muscles immer Arrays sind
+            $primaryMuscles = $entry->exercise->primary_muscles ?? [];
+            $secondaryMuscles = $entry->exercise->secondary_muscles ?? [];
+            $muscles = array_merge($primaryMuscles, $secondaryMuscles);
+
+            foreach ($muscles as $muscle) {
+                $muscleEnum = Muscle::tryFrom($muscle);
+                if ($muscleEnum) {
+                    $muscleLabel = $muscleEnum->getLabel();
+                    if (!isset($muscleFrequency[$muscleLabel])) {
+                        $muscleFrequency[$muscleLabel] = 0;
+                    }
+                    $muscleFrequency[$muscleLabel]++;
                 }
-                $muscleFrequency[$muscleName]++;
             }
         }
 

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Enums\Muscle;
 
 class Exercise extends Model
 {
@@ -26,6 +27,8 @@ class Exercise extends Model
         'orientation',
         'video_url',
         'preview_image',
+        'primary_muscles',
+        'secondary_muscles'
     ];
 
     /**
@@ -37,15 +40,26 @@ class Exercise extends Model
         'id' => 'integer',
         'uses_cable' => 'boolean',
         'orientation' => Orientation::class,
+        'primary_muscles' => 'array',
+        'secondary_muscles' => 'array',
     ];
+
+    public function getPrimaryMusclesLabelAttribute()
+    {
+        return collect($this->primary_muscles)
+            ->map(fn($muscle) => Muscle::tryFrom($muscle)?->getLabel() ?? $muscle)
+            ->implode(', ');
+    }
+
+    public function getSecondaryMusclesLabelAttribute()
+    {
+        return collect($this->secondary_muscles)
+            ->map(fn($muscle) => Muscle::tryFrom($muscle)?->getLabel() ?? $muscle)
+            ->implode(', ');
+    }
 
     public function diaryEntries(): HasMany
     {
         return $this->hasMany(DiaryEntry::class);
-    }
-
-    public function muscles(): BelongsToMany
-    {
-        return $this->belongsToMany(Muscle::class, 'exercise_muscle', 'exercise_id', 'muscle_id');
     }
 }
