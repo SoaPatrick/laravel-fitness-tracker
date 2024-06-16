@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Enums\Orientation;
+use App\Enums\Muscle;
 use App\Filament\Resources\ExerciseResource\Pages;
 use App\Filament\Resources\ExerciseResource\RelationManagers;
 use App\Models\Exercise;
@@ -42,6 +43,17 @@ class ExerciseResource extends Resource
                             Forms\Components\TextInput::make('height')
                                 ->columnSpanFull()
                                 ->numeric(),
+                            Forms\Components\Select::make('primary_muscles')
+                                ->multiple()
+                                ->options(Muscle::class)
+                                ->columnSpanFull()
+                                ->preload()
+                                ->required(),
+                            Forms\Components\Select::make('secondary_muscles')
+                                ->multiple()
+                                ->options(Muscle::class)
+                                ->columnSpanFull()
+                                ->preload(),
                             Forms\Components\ToggleButtons::make('uses_cable')
                                 ->required()
                                 ->grouped()
@@ -52,12 +64,6 @@ class ExerciseResource extends Resource
                                 ->grouped()
                                 ->options(Orientation::class)
                                 ->default('up'),
-                            Forms\Components\Select::make('muscles')
-                                ->multiple()
-                                ->columnSpanFull()
-                                ->relationship('muscles', 'name')
-                                ->preload()
-                                ->required(),
                         ])
                     ->grow(true),
                     Forms\Components\Section::make()
@@ -108,7 +114,9 @@ class ExerciseResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('preview_image'),
+                Tables\Columns\ImageColumn::make('preview_image')
+                    ->label('Preview')
+                    ->size(75),
                 Tables\Columns\TextColumn::make('number')
                     ->label('ID')
                     ->numeric()
@@ -117,8 +125,14 @@ class ExerciseResource extends Resource
                     ->searchable()
                     ->weight(FontWeight::Bold)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('muscles.name')
-                    ->searchable()
+                Tables\Columns\TextColumn::make('primary_muscles_label')
+                    ->label('Primary')
+                    ->separator(',')
+                    ->badge(),
+                Tables\Columns\TextColumn::make('secondary_muscles_label')
+                    ->label('Secondary')
+                    ->color('warning')
+                    ->separator(',')
                     ->badge(),
                 Tables\Columns\TextColumn::make('height')
                     ->numeric()

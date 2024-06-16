@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Actions\Action;
+use App\Enums\Muscle;
 
 class DiaryEntryResource extends Resource
 {
@@ -88,10 +89,17 @@ class DiaryEntryResource extends Resource
                     ->sortable()
                     ->weight(FontWeight::Bold)
                     ->prefix(fn (DiaryEntry $record) => $record->exercise->number . '. '),
-                Tables\Columns\TextColumn::make('exercise.muscles.name')
-                    ->badge()
-                    ->numeric()
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('exercise.primary_muscles_label')
+                    ->label('Primary')
+                    ->searchable()
+                    ->separator(',')
+                    ->badge(),
+                Tables\Columns\TextColumn::make('exercise.secondary_muscles_label')
+                    ->label('Secondary')
+                    ->searchable()
+                    ->color('warning')
+                    ->separator(',')
+                    ->badge(),
                 Tables\Columns\TextColumn::make('exercise.height')
                     ->numeric()
                     ->suffix('cm'),

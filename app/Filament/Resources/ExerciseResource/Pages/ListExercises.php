@@ -7,7 +7,8 @@ use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
-use App\Models\Muscle;
+use App\Enums\Muscle;
+
 
 class ListExercises extends ListRecords
 {
@@ -27,17 +28,16 @@ class ListExercises extends ListRecords
             'all' => Tab::make(),
         ];
 
-        // Holen Sie alle Muskelnamen aus der Datenbank
-        $muscles = Muscle::all();
+        // Holen Sie alle Muskel Enum Werte
+        $muscles = Muscle::cases();
 
         // Erstellen Sie für jeden Muskel einen Tab
         foreach ($muscles as $muscle) {
-            $tabs[$muscle->name] = Tab::make()
-                ->modifyQueryUsing(fn (Builder $query) => $query
-                    ->whereHas('muscles', fn (Builder $query) => 
-                        $query->where('name', $muscle->name)
-                    )
-                );
+            $tabs[$muscle->value] = Tab::make()
+                ->modifyQueryUsing(function (Builder $query) use ($muscle) {
+                    $query->whereJsonContains('primary_muscles', $muscle->value)
+                          ->orWhereJsonContains('secondary_muscles', $muscle->value);
+                });
         }
 
         return $tabs;
