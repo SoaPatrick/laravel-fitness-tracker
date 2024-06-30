@@ -2,6 +2,7 @@ database/database.sqlite
 node_modules/*
 node_modules/
 public/hot
+public/storage
 storage/*
 vendor/*
 .git/*
