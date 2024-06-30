@@ -6,7 +6,6 @@ use App\Filament\Resources\DiaryEntryResource\Pages;
 use App\Filament\Resources\DiaryEntryResource\RelationManagers;
 use App\Filament\Resources\ExerciseResource\RelationManagers\DiaryentriesRelationManager;
 use App\Models\DiaryEntry;
-use App\Models\Exercise;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -14,11 +13,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Grouping\Group;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Actions\Action;
-use App\Enums\Muscle;
 
 class DiaryEntryResource extends Resource
 {
@@ -74,15 +71,26 @@ class DiaryEntryResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->groups([
+            ->defaultGroup(
                 Group::make('date')
-                    ->date(),
-                'exercise.title',
-            ])
+                    ->collapsible()
+                    ->orderQueryUsing(
+                        fn(Builder $query, string $direction) => $query->orderBy('date', 'desc')
+                    )
+                    ->getTitleFromRecordUsing(
+                        fn(DiaryEntry $record): string => $record->date->format('l j M Y')
+                    )
+                    ->titlePrefixedWithLabel(false),
+            )
             ->columns([
                 Tables\Columns\TextColumn::make('date')
                     ->date('l j M Y')
+                    ->hidden()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('exercise.number')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('exercise.title')
                     ->numeric()
                     ->searchable()
@@ -101,6 +109,7 @@ class DiaryEntryResource extends Resource
                     ->separator(',')
                     ->badge(),
                 Tables\Columns\TextColumn::make('exercise.height')
+                    ->label('Height')
                     ->numeric()
                     ->suffix('cm'),
                 Tables\Columns\TextColumn::make('weight')
@@ -117,7 +126,8 @@ class DiaryEntryResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->defaultSort('date', 'desc')
+            ->defaultSort('exercise.number')
+            ->defaultPaginationPageOption(25)
             ->filters([
                 //
             ])

@@ -13,9 +13,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Str;
 use Filament\Support\Enums\FontWeight;
 
 class ExerciseResource extends Resource
@@ -120,6 +117,7 @@ class ExerciseResource extends Resource
                 Tables\Columns\TextColumn::make('number')
                     ->label('ID')
                     ->numeric()
+                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('title')
                     ->searchable()
